@@ -595,6 +595,19 @@ class Exchange2010CalendarEvent(BaseExchangeCalendarEvent):
       elif recurrence_node.find('t:AbsoluteYearlyRecurrence', namespaces=soap_request.NAMESPACES) is not None:
         result['recurrence'] = 'yearly'
 
+    try:
+        categories_node = response.xpath(u'//m:Items/t:CalendarItem/t:Categories', namespaces=soap_request.NAMESPACES)[0]
+    except IndexError:
+      categories_node = None
+    
+    if categories_node is not None:
+        property_map = {
+          u'categories': {
+            u'xpath': u'//t:String',
+          }
+        }
+        result = {**result, **self.service._xpath_to_dict(element=categories_node, property_map=property_map, namespace_map=soap_request.NAMESPACES)}
+
     return result
 
   def _parse_event_organizer(self, response):
